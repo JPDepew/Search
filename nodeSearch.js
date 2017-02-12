@@ -27,34 +27,78 @@ function validSearch(res, key){
    	res.writeHead(200, {'Content-Type': 'text/html'});
 	res.write('<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Search Results</title></head><body><h2>Search Results</h2><ol>');
         //**** Insert one or more newlines in long strings of output. It may make it easier for the HTML to get interpreted if it gets newlines to flush things out. **
-		 
+	var address = new Array();
+	var address2 = new Array();
 	var resultLower = key.toLowerCase();
-	var target = /*"%" + */resultLower;// + "%";
-	var count = 0;
+	var keyArray = new Array();
+	var keyArrayCount = 1;
+	var tarArray = new Array();
+	var usedAddress = false;
 
-	lineReader.eachLine('keywordfile', function(line, last){
-		console.log('got inside line reader');
-		// Checks if target is a substring in line
-		if(include(line, target)){
-			var tarArray = line.split("|");
-			//console.log("tarArray: " + tarArray);
-			var address = tarArray[2]; //"http://10.188.140.212/" + tarArray[3];
-			//console.log("address: " + address);
-			var Description = tarArray[1].split("|");
-			res.write('<li><a href="' + address + '">' + address + '</a>' + ' '  + tarArray[1] + '</li>');  //**** End it with a newline. ***
-			count++;
-		}
-		if(last){
-			if (count == 0){
-				res.end('<li>No matches found.</li></ol></body></html>\n');
-			}
-			else{
-				res.end('</ol></body></html>\n');
-			}
-				    
-		}
-	});
+	keyArray = resultLower.split(" ");
 
+	for(var i = 0; i < keyArray.length; i++)
+	{
+	   keyArrayCount++
+	   var count = 0;
+
+	   console.log(keyArray);
+	   var target = keyArray[i];
+	   console.log(target);
+
+	   // BUG: NOT GOING INTO LINE READER WITH FIRST SEARCH TERM WHEN MORE THAN 1 SEARCH TERM
+	   lineReader.eachLine('keywordfile', function(line, last){
+	      console.log(target);
+
+	      // Checks if target is a substring in line
+	      if(include(line, target)){
+	        tarArray = line.split("|");
+		address[i] = tarArray[2];
+		if(address2 != null)
+	        {
+	          for(var j = 0; j < address2.length; j++)
+	          {
+	             if(address2[j] == address[i])
+	             {
+	                usedAddress = true;
+	             }
+	          }
+                }
+	        if(!usedAddress)
+	        {
+	           res.write('<li><a href="' + address[i] + '">' + address[i] + '</a>' + ' '  + tarArray[1] + '</li>');
+	        }
+	        usedAddress = false;
+	        address2[i] = address[i];
+	        count++;
+	      }
+	      if(last && (keyArrayCount <= keyArray.length)){
+	         if (count == 0){
+	            res.end('<li>No matches found.</li></ol></body></html>\n');
+	         }
+	         else
+	         {
+	            res.end('</ol></body></html>\n');	
+	         }    
+	      }
+	   });
+	}
+/*
+console.log(address[0]);
+	for(var i = 0; i < address.length; i++)
+	{
+		for(var j = 0; j < address.length; i++)
+		{
+			if(address[i] == address[j])
+			{
+				i++;
+			}
+		}
+console.log(address[i]);
+		res.write('<li><a href="' + address[i] + '">' + address[i] + '</a>' + ' '  + tarArray[1] + '</li>');
+	}
+
+*/
 }
 
 // Express app
