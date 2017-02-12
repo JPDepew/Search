@@ -24,26 +24,34 @@ var options = {
 
 */
 function validSearch(res, key){
-   	res.writeHead(200, {'Content-Type': 'text/html'});
+
 	res.write('<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Search Results</title></head><body><h2>Search Results</h2><ol>');
         //**** Insert one or more newlines in long strings of output. It may make it easier for the HTML to get interpreted if it gets newlines to flush things out. **
-	var address = new Array();
-	var address2 = new Array();
+
+	var address;// = new Array();
+
+	//var address2 = new Array();
+
 	var resultLower = key.toLowerCase();
-	var keyArray = new Array();
-	var keyArrayCount = 1;
-	var tarArray = new Array();
-	var usedAddress = false;
 
-	keyArray = resultLower.split(" ");
+	//var keyArray = new Array();
+	//var keyArrayCount = 1;
 
-	for(var i = 0; i < keyArray.length; i++)
-	{
-	   keyArrayCount++
+	var tarArray;// = new Array();
+
+	//var usedAddress = false;
+
+	//keyArray = resultLower.split(" ");
+	//console.log(keyArray.length);
+	//var i;
+	//for(i = 0; i < keyArray.length; i++)
+	//{
+	   //console.log(i);
+	   //keyArrayCount++
 	   var count = 0;
 
-	   console.log(keyArray);
-	   var target = keyArray[i];
+	   //console.log(keyArray);
+	   var target = key; //keyArray[i];
 	   console.log(target);
 
 	   // BUG: NOT GOING INTO LINE READER WITH FIRST SEARCH TERM WHEN MORE THAN 1 SEARCH TERM
@@ -53,7 +61,8 @@ function validSearch(res, key){
 	      // Checks if target is a substring in line
 	      if(include(line, target)){
 	        tarArray = line.split("|");
-		address[i] = tarArray[2];
+		address = tarArray[2];
+/*		
 		if(address2 != null)
 	        {
 	          for(var j = 0; j < address2.length; j++)
@@ -66,23 +75,26 @@ function validSearch(res, key){
                 }
 	        if(!usedAddress)
 	        {
-	           res.write('<li><a href="' + address[i] + '">' + address[i] + '</a>' + ' '  + tarArray[1] + '</li>');
-	        }
-	        usedAddress = false;
-	        address2[i] = address[i];
+*/
+
+	           res.write('<li><a href="' + address + '">' + address + '</a>' + ' '  + tarArray[1] + '</li>');
+
+	        //}
+	        //usedAddress = false;
+	        //address2[i] = address[i];
 	        count++;
 	      }
-	      if(last && (keyArrayCount <= keyArray.length)){
+	      if(last){
 	         if (count == 0){
-	            res.end('<li>No matches found.</li></ol></body></html>\n');
+	            res.write('<li>No matches found.</li></ol></body></html>\n');
 	         }
 	         else
 	         {
-	            res.end('</ol></body></html>\n');	
+	            res.write('</ol></body></html>\n');	
 	         }    
 	      }
 	   });
-	}
+	//}
 /*
 console.log(address[0]);
 	for(var i = 0; i < address.length; i++)
@@ -109,20 +121,28 @@ var app = express()
 
 		var parts = url.parse(req.url, true);
 		var key = parts.query.searchTerm;
-		console.log(key);
-                if(key != null){
-                       // res.write('Search: ' + key + '\n');
+	        var keyArr = key.split(" ");
+	        var i;
+	  res.writeHead(200, {'Content-Type': 'text/html'});
+	  for(i = 0; i < keyArr.length; i++)
+	  {
+	    var key2 = keyArr[i];
+		console.log(key2);
+                if(key2 != null){
+                       // res.write('Search: ' + key2 + '\n');
 
-			if( key === null || key === "null" || key.length < 2
-			 || key.length > 48 || key.search(/^[A-Za-z _0-9\+-\.=#:]+$/) != 0 )
+			if( key2 === null || key2 === "null" || key2.length < 2
+			 || key2.length > 48 || key2.search(/^[A-Za-z _0-9\+-\.=#:]+$/) != 0 )
 			{
-			   res.send(400, {status: 'Invalid Search Term'});
+			   //res.send(400, {status: 'Invalid Search Term'});
+	        res.status(400).send('Invalid Search Term')
 			}
 
 			else
 			{
+
 			   // If it is a valid search key, proceed to display the list of web pages with matching terms
-			   validSearch(res, key);
+			   validSearch(res, key2);
 			}
 
                 }
@@ -130,6 +150,7 @@ var app = express()
 			res.end('Body does not have search.');  //*** Does not have a search term. ********************
 
 		}
+	  }
 	})
 	
 	app.all('/nodeSearch', function (req, res, next) {
